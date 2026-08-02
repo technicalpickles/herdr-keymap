@@ -177,6 +177,14 @@ ask for confirmation before running.
   actions use `focused: true` from `workspace list` / `tab list`, which is
   correct under both placements: the overlay lives in the active
   workspace/tab, and a popup never moves focus off it.
+- **Escape needs its own handling.** None of `@inquirer/prompts`'
+  `search`/`select`/`input`/`confirm` recognize Escape themselves (confirmed
+  from their source — each only branches on enter/tab/up/down and treats
+  everything else, Escape included, as a line edit). `withEscape()` in
+  `herdr-cli.ts` watches for it via a raw `keypress` listener and cancels the
+  active prompt through `@inquirer/core`'s `AbortSignal` support (the second
+  argument every prompt call accepts), which rejects with `AbortPromptError`
+  through the same clean teardown Ctrl+C already uses.
 - `--session` is never passed and `HERDR_SOCKET_PATH`/`HERDR_SESSION` are
   never touched — the runtime already injects the correct socket for the
   session that launched the plugin.

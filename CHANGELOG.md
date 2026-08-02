@@ -4,6 +4,18 @@ All notable changes to this plugin are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/); versioning is
 [SemVer](https://semver.org/).
 
+## [0.7.3] - fork spike (unreleased upstream)
+
+### Fixed
+- Escape didn't actually close the palette or cancel a sub-prompt — none of
+  `@inquirer/prompts`' `search`/`select`/`input`/`confirm` handle it
+  natively, contrary to what this CHANGELOG and the README had been
+  claiming since 0.4.0. Added `withEscape()` (`herdr-cli.ts`), which watches
+  for Escape via a raw keypress listener and cancels the active prompt
+  through `@inquirer/core`'s `AbortSignal` support, rejecting with
+  `AbortPromptError` through the same clean teardown Ctrl+C already uses.
+  Wired into every prompt call site in `keymap.ts` and `actions.ts`.
+
 ## [0.7.2] - fork spike (unreleased upstream)
 
 ### Changed

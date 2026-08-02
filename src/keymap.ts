@@ -1,7 +1,8 @@
-import { ExitPromptError } from "@inquirer/core";
+import { AbortPromptError, ExitPromptError } from "@inquirer/core";
 import { search } from "@inquirer/prompts";
 import { ACTIONS, CATEGORY_ORDER, PaletteBack } from "./actions.ts";
 import { loadEffectiveKeys } from "./config.ts";
+import { withEscape } from "./herdr-cli.ts";
 
 const EXIT = "__exit__";
 
@@ -41,21 +42,26 @@ function formatChoice(name: string, keys: Record<string, string>) {
 // against category/key/description is enough for a ~35-entry static list;
 // no fuzzy-match dependency needed.
 async function pickAction(keys: Record<string, string>): Promise<string> {
-  return search({
-    message: "Command",
-    pageSize: computePageSize(),
-    source: async (term) => {
-      const needle = term?.toLowerCase() ?? "";
-      const names = needle
-        ? ALL_NAMES.filter((n) => {
-            const e = ACTIONS[n];
-            const haystack = `${e.category} ${n} ${e.description} ${keys[n] ?? ""}`.toLowerCase();
-            return haystack.includes(needle);
-          })
-        : ALL_NAMES;
-      return [...names.map((n) => formatChoice(n, keys)), { name: "Exit", value: EXIT }];
-    },
-  });
+  return withEscape((context) =>
+    search(
+      {
+        message: "Command",
+        pageSize: computePageSize(),
+        source: async (term) => {
+          const needle = term?.toLowerCase() ?? "";
+          const names = needle
+            ? ALL_NAMES.filter((n) => {
+                const e = ACTIONS[n];
+                const haystack = `${e.category} ${n} ${e.description} ${keys[n] ?? ""}`.toLowerCase();
+                return haystack.includes(needle);
+              })
+            : ALL_NAMES;
+          return [...names.map((n) => formatChoice(n, keys)), { name: "Exit", value: EXIT }];
+        },
+      },
+      context,
+    ),
+  );
 }
 
 async function main() {
@@ -83,14 +89,16 @@ async function main() {
       } catch (err) {
         // "❮ Back", an empty/declined prompt, or Esc/Ctrl+C inside a sub-prompt
         // all mean "cancel this action" — return to the search list, don't exit.
-        if (err instanceof PaletteBack || err instanceof ExitPromptError) continue;
+        // Ctrl+C surfaces as ExitPromptError (core's own SIGINT handling);
+        // Esc surfaces as AbortPromptError (our withEscape() signal).
+        if (err instanceof PaletteBack || err instanceof ExitPromptError || err instanceof AbortPromptError) continue;
         console.log(`error: ${(err as Error).message}`);
       }
       return; // one command per palette open — reopen (prefix+m) for another
     }
   } catch (err) {
-    if (!(err instanceof ExitPromptError)) throw err;
-    // clean exit: Esc or Ctrl+C/Ctrl+D at any prompt
+    if (!(err instanceof ExitPromptError || err instanceof AbortPromptError)) throw err;
+    // clean exit: Esc or Ctrl+C/Ctrl+D at the top-level search list
   }
 }
 

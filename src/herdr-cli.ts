@@ -2,6 +2,30 @@ import { execFileSync } from "node:child_process";
 import { appendFileSync } from "node:fs";
 import { join } from "node:path";
 
+// None of @inquirer/prompts' individual prompt types (search/select/input/
+// confirm) handle Escape themselves — confirmed from their source: each only
+// branches on enter/tab/up/down and treats everything else, including
+// Escape, as a line edit. createPrompt's shared machinery does support
+// cancellation, though, via an AbortSignal passed as the prompt's second
+// argument (context.signal) — it rejects with AbortPromptError through the
+// same clean teardown Ctrl+C already uses. So: watch for Escape ourselves
+// and abort through that channel, rather than reimplementing per-prompt key
+// handling or forcing an ungraceful process.exit. Callers pass a thunk that
+// forwards the context we build here to the actual prompt call, e.g.
+// `withEscape((context) => search({...}, context))`.
+export async function withEscape<T>(promptCall: (context: { signal: AbortSignal }) => Promise<T>): Promise<T> {
+  const controller = new AbortController();
+  const onKeypress = (_str: string, key: { name?: string } = {}) => {
+    if (key.name === "escape") controller.abort();
+  };
+  process.stdin.on("keypress", onKeypress);
+  try {
+    return await promptCall({ signal: controller.signal });
+  } finally {
+    process.stdin.off("keypress", onKeypress);
+  }
+}
+
 // herdr has no documented way for a pane command to redirect its own stdout
 // into "herdr plugin log list" (that only captures build failures) — so we
 // keep our own log file instead of printing results to the visible pane.

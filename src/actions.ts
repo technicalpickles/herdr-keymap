@@ -1,5 +1,5 @@
 import { Separator, confirm, input, select } from "@inquirer/prompts";
-import { currentPane, currentWorkspaceId, herdr, originCwd, originPaneId } from "./herdr-cli.ts";
+import { currentPane, currentWorkspaceId, herdr, originCwd, originPaneId, withEscape } from "./herdr-cli.ts";
 
 // display order only — doesn't affect execution, just groups the palette.
 export const CATEGORY_ORDER = ["workspace", "tab", "worktree", "pane", "agent", "general"];
@@ -10,7 +10,9 @@ export class PaletteBack extends Error {}
 const BACK = "__back__";
 
 async function newWorkspace() {
-  const label = (await input({ message: "Label (empty to skip, Esc to cancel):" })).trim();
+  const label = (
+    await withEscape((context) => input({ message: "Label (empty to skip, Esc to cancel):" }, context))
+  ).trim();
   const args = ["workspace", "create", "--focus"];
   const cwd = originCwd();
   if (cwd) args.push("--cwd", cwd);
@@ -19,15 +21,16 @@ async function newWorkspace() {
 }
 
 async function renameWorkspace() {
-  const label = (await input({ message: "New name (empty to cancel):" })).trim();
+  const label = (await withEscape((context) => input({ message: "New name (empty to cancel):" }, context))).trim();
   if (!label) throw new PaletteBack();
   herdr("workspace", "rename", currentWorkspaceId(), label);
 }
 
 async function closeWorkspace() {
-  if (!(await confirm({ message: "Close the current workspace?", default: false }))) {
-    throw new PaletteBack();
-  }
+  const ok = await withEscape((context) =>
+    confirm({ message: "Close the current workspace?", default: false }, context),
+  );
+  if (!ok) throw new PaletteBack();
   herdr("workspace", "close", currentWorkspaceId());
 }
 
@@ -46,17 +49,22 @@ async function navigateWorkspace(direction: 1 | -1) {
 async function workspacePicker() {
   const { workspaces } = herdr("workspace", "list");
   const sorted = [...workspaces].sort((a: any, b: any) => a.number - b.number);
-  const id = await select({
-    message: "Go to workspace",
-    choices: [
-      { name: "❮ Back", value: BACK },
-      new Separator(),
-      ...sorted.map((w: any) => ({
-        name: `${w.number}. ${w.label ?? w.workspace_id}${w.focused ? "  (current)" : ""}`,
-        value: w.workspace_id,
-      })),
-    ],
-  });
+  const id = await withEscape((context) =>
+    select(
+      {
+        message: "Go to workspace",
+        choices: [
+          { name: "❮ Back", value: BACK },
+          new Separator(),
+          ...sorted.map((w: any) => ({
+            name: `${w.number}. ${w.label ?? w.workspace_id}${w.focused ? "  (current)" : ""}`,
+            value: w.workspace_id,
+          })),
+        ],
+      },
+      context,
+    ),
+  );
   if (id === BACK) throw new PaletteBack();
   herdr("workspace", "focus", id);
 }
@@ -75,30 +83,39 @@ async function switchTab() {
   const wsId = currentWorkspaceId();
   const { tabs } = herdr("tab", "list", "--workspace", wsId);
   const sorted = [...tabs].sort((a: any, b: any) => a.number - b.number);
-  const id = await select({
-    message: "Go to tab",
-    choices: [
-      { name: "❮ Back", value: BACK },
-      new Separator(),
-      ...sorted.map((t: any) => ({
-        name: `${t.number}. ${t.label ?? t.tab_id}${t.focused ? "  (current)" : ""}`,
-        value: t.tab_id,
-      })),
-    ],
-  });
+  const id = await withEscape((context) =>
+    select(
+      {
+        message: "Go to tab",
+        choices: [
+          { name: "❮ Back", value: BACK },
+          new Separator(),
+          ...sorted.map((t: any) => ({
+            name: `${t.number}. ${t.label ?? t.tab_id}${t.focused ? "  (current)" : ""}`,
+            value: t.tab_id,
+          })),
+        ],
+      },
+      context,
+    ),
+  );
   if (id === BACK) throw new PaletteBack();
   herdr("tab", "focus", id);
 }
 
 async function newWorktree() {
-  const branch = (await input({ message: "Branch (empty to skip, Esc to cancel):" })).trim();
+  const branch = (
+    await withEscape((context) => input({ message: "Branch (empty to skip, Esc to cancel):" }, context))
+  ).trim();
   const args = ["worktree", "create", "--workspace", currentWorkspaceId(), "--focus"];
   if (branch) args.push("--branch", branch);
   herdr(...args);
 }
 
 async function newTab() {
-  const label = (await input({ message: "Label (empty to skip, Esc to cancel):" })).trim();
+  const label = (
+    await withEscape((context) => input({ message: "Label (empty to skip, Esc to cancel):" }, context))
+  ).trim();
   const args = ["tab", "create", "--workspace", currentWorkspaceId(), "--focus"];
   const cwd = originCwd();
   if (cwd) args.push("--cwd", cwd);
@@ -107,15 +124,16 @@ async function newTab() {
 }
 
 async function renameTab() {
-  const label = (await input({ message: "New tab name (empty to cancel):" })).trim();
+  const label = (
+    await withEscape((context) => input({ message: "New tab name (empty to cancel):" }, context))
+  ).trim();
   if (!label) throw new PaletteBack();
   herdr("tab", "rename", currentPane().tab_id, label);
 }
 
 async function closeTab() {
-  if (!(await confirm({ message: "Close the current tab?", default: false }))) {
-    throw new PaletteBack();
-  }
+  const ok = await withEscape((context) => confirm({ message: "Close the current tab?", default: false }, context));
+  if (!ok) throw new PaletteBack();
   herdr("tab", "close", currentPane().tab_id);
 }
 
@@ -131,9 +149,8 @@ function splitPane(direction: string) {
 }
 
 async function closePane() {
-  if (!(await confirm({ message: "Close the current pane?", default: false }))) {
-    throw new PaletteBack();
-  }
+  const ok = await withEscape((context) => confirm({ message: "Close the current pane?", default: false }, context));
+  if (!ok) throw new PaletteBack();
   herdr("pane", "close", originPaneId());
 }
 
@@ -154,18 +171,23 @@ async function pickAgent(message: string): Promise<string> {
   }
   const { workspaces } = herdr("workspace", "list");
   const wsLabel = new Map(workspaces.map((w: any) => [w.workspace_id, w.label ?? w.workspace_id]));
-  const value = await select({
-    message,
-    choices: [
-      { name: "❮ Back", value: BACK },
-      new Separator(),
-      // terminal_id is the unambiguous target (names can collide / be unset).
-      ...agents.map((a: any) => ({
-        name: `${a.terminal_title_stripped ?? a.agent}  [${a.agent_status}]  ${wsLabel.get(a.workspace_id) ?? a.workspace_id}${a.focused ? "  (focused)" : ""}`,
-        value: a.terminal_id,
-      })),
-    ],
-  });
+  const value = await withEscape((context) =>
+    select(
+      {
+        message,
+        choices: [
+          { name: "❮ Back", value: BACK },
+          new Separator(),
+          // terminal_id is the unambiguous target (names can collide / be unset).
+          ...agents.map((a: any) => ({
+            name: `${a.terminal_title_stripped ?? a.agent}  [${a.agent_status}]  ${wsLabel.get(a.workspace_id) ?? a.workspace_id}${a.focused ? "  (focused)" : ""}`,
+            value: a.terminal_id,
+          })),
+        ],
+      },
+      context,
+    ),
+  );
   if (value === BACK) throw new PaletteBack();
   return value;
 }
@@ -176,7 +198,9 @@ async function focusAgent() {
 
 async function renameAgent() {
   const target = await pickAgent("Rename which agent");
-  const name = (await input({ message: "New agent name (empty to cancel):" })).trim();
+  const name = (
+    await withEscape((context) => input({ message: "New agent name (empty to cancel):" }, context))
+  ).trim();
   if (!name) throw new PaletteBack();
   herdr("agent", "rename", target, name);
 }
