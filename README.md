@@ -107,9 +107,9 @@ Press `prefix+m` (by default `ctrl+b`, release, then `m`) to open the
 palette. It opens as a floating popup (80% width, 20 rows) over whatever
 you were looking at, rather than taking over the screen. No banner or
 chrome — it drops straight into a search prompt: every action is listed up
-front, tagged with its category (e.g.
-`[pane] prefix+v              Split vertical (left/right)`); type to filter
-by category, key, or description, arrow to the match, enter to run.
+front as description, category, and key (e.g.
+`Split vertical (left/right)      [pane]      prefix+v`); type to filter by
+category, key, or description, arrow to the match, enter to run.
 Matching is plain case-insensitive substring, not true fuzzy — enough for a
 ~35-entry list without pulling in a fuzzy-match dependency.
 

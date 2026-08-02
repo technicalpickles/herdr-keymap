@@ -8,10 +8,12 @@ const EXIT = "__exit__";
 
 const ALL_NAMES = Object.keys(ACTIONS);
 
-// Pad the `[category]` tag to the widest one (not just the key column) so
-// descriptions line up in a single column regardless of which category a
-// row belongs to — "[tab]" and "[workspace]" differ by 6 characters.
+// Column widths derived from the data itself (not a magic number) so
+// category/key line up regardless of which row they belong to — "[tab]" and
+// "[workspace]" differ by 6 characters, and descriptions range from "New
+// tab" to "Navigate pane (contextual mode)".
 const CATEGORY_WIDTH = Math.max(...CATEGORY_ORDER.map((c) => `[${c}]`.length)) + 1;
+const DESCRIPTION_WIDTH = Math.max(...Object.values(ACTIONS).map((e) => e.description.length)) + 2;
 
 // @inquirer/search hardcodes pageSize to 7 regardless of terminal size,
 // which wastes space in a popup taller than 7 rows. Size it to the popup
@@ -32,7 +34,7 @@ function formatChoice(name: string, keys: Record<string, string>) {
   const tag = entry.executor ? "" : `  [${entry.noCli}]`;
   const categoryTag = `[${entry.category}]`.padEnd(CATEGORY_WIDTH);
   return {
-    name: `${categoryTag}${key.padEnd(22)} ${entry.description}${tag}`,
+    name: `${entry.description.padEnd(DESCRIPTION_WIDTH)}${categoryTag}${key}${tag}`,
     value: name,
   };
 }

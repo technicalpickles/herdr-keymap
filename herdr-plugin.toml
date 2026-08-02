@@ -1,6 +1,6 @@
 id = "tds.keymap"
 name = "Keymap Palette"
-version = "0.7.3"
+version = "0.7.4"
 min_herdr_version = "0.7.4"
 description = "List herdr keybindings in a popup and run the ones with a CLI equivalent"
 platforms = ["linux", "macos"]

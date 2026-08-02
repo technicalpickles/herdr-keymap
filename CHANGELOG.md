@@ -4,7 +4,16 @@ All notable changes to this plugin are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/); versioning is
 [SemVer](https://semver.org/).
 
-## [0.7.3] - fork spike (unreleased upstream)
+## [0.7.4] - fork spike (unreleased upstream)
+
+### Changed
+- Reordered each row's columns to description, category, key (was
+  category, key, description) — leads with the thing you're scanning for.
+  Widths for both the description and category columns are now derived
+  from the data (longest value + gap) instead of a fixed key-column-only
+  width, so the columns stay aligned regardless of order.
+
+
 
 ### Fixed
 - Escape didn't actually close the palette or cancel a sub-prompt — none of
