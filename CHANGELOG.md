@@ -4,6 +4,16 @@ All notable changes to this plugin are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/); versioning is
 [SemVer](https://semver.org/).
 
+## [0.7.1] - fork spike (unreleased upstream)
+
+### Removed
+- Dropped the banner header (plugin name + version box) from every prompt
+  screen. It existed to stay visible while navigating a full-screen overlay;
+  in a small popup it's pure overhead. `headed()`, `HEADER`, and `NAV_THEME`
+  are gone from `herdr-cli.ts`; prompts now pass their message directly and
+  use inquirer's default theme. `computePageSize()`'s chrome budget dropped
+  from ~10 rows to ~4 accordingly.
+
 ## [0.7.0] - fork spike (unreleased upstream)
 
 ### Changed

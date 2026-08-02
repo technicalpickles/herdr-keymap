@@ -2,7 +2,6 @@ import { ExitPromptError } from "@inquirer/core";
 import { search } from "@inquirer/prompts";
 import { ACTIONS, PaletteBack } from "./actions.ts";
 import { loadEffectiveKeys } from "./config.ts";
-import { NAV_THEME, headed } from "./herdr-cli.ts";
 
 const EXIT = "__exit__";
 
@@ -10,12 +9,12 @@ const ALL_NAMES = Object.keys(ACTIONS);
 
 // @inquirer/search hardcodes pageSize to 7 regardless of terminal size,
 // which wastes space in a popup taller than 7 rows. Size it to the popup
-// instead: header banner + blank lines + message (~6 rows) + footer hint +
-// margin for a wrapped line (~4 rows) = ~10 rows of chrome; give the rest to
+// instead: message line + footer hint + margin for a wrapped line (~4 rows
+// total, now that there's no banner) = ~4 rows of chrome; give the rest to
 // the list. process.stdout.rows is unset when stdout isn't a TTY (e.g.
 // under test or a piped invocation) — fall back to something roomier than
 // inquirer's default in that case too.
-const CHROME_ROWS = 10;
+const CHROME_ROWS = 4;
 function computePageSize(): number {
   const rows = process.stdout.rows;
   return rows ? Math.max(7, rows - CHROME_ROWS) : 15;
@@ -37,8 +36,7 @@ function formatChoice(name: string, keys: Record<string, string>) {
 // no fuzzy-match dependency needed.
 async function pickAction(keys: Record<string, string>): Promise<string> {
   return search({
-    message: headed("Command"),
-    theme: NAV_THEME,
+    message: "Command",
     pageSize: computePageSize(),
     source: async (term) => {
       const needle = term?.toLowerCase() ?? "";
