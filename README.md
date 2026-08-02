@@ -164,14 +164,20 @@ ask for confirmation before running.
   `open_worktree`, `remove_worktree` are assigned on preview, not empty). The
   tests only verify the table's internal consistency, not that it matches the
   actually installed channel.
-- **Pane-scoped actions target the originating pane, not the palette.** The
-  palette is an overlay pane, so while it is open it is itself the `focused`
-  pane — `pane split/focus/zoom/close --current` would act on the palette
-  (and splitting an overlay makes herdr ignore `--direction`, so a horizontal
-  split came out vertical). These actions instead resolve the pane you came
-  from via `HERDR_PLUGIN_CONTEXT_JSON.focused_pane_id`. Workspace/tab actions
-  still use `focused: true` from `workspace list` / `tab list`, which is
-  correct because the overlay lives in the active workspace/tab.
+- **Pane-scoped actions target the originating pane, not the palette.** Under
+  the default overlay placement this matters: the palette is itself a real,
+  focused pane while open, so `pane split/focus/zoom/close --current` would
+  act on the palette (and splitting an overlay makes herdr ignore
+  `--direction`, so a horizontal split came out vertical). These actions
+  instead resolve the pane you came from via
+  `HERDR_PLUGIN_CONTEXT_JSON.focused_pane_id`. Under this fork's popup
+  placement it isn't actually a bug waiting to happen — per herdr's
+  socket-api docs, a popup "leaves plugin focus context on the underlying
+  tiled pane," so `--current` would already resolve correctly there too —
+  but the code still goes through `focused_pane_id` either way. Workspace/tab
+  actions use `focused: true` from `workspace list` / `tab list`, which is
+  correct under both placements: the overlay lives in the active
+  workspace/tab, and a popup never moves focus off it.
 - `--session` is never passed and `HERDR_SOCKET_PATH`/`HERDR_SESSION` are
   never touched — the runtime already injects the correct socket for the
   session that launched the plugin.

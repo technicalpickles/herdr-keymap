@@ -76,13 +76,19 @@ export function currentPane(): any {
   return pane;
 }
 
-// The palette runs as an overlay pane, so IT is the focused pane while open —
-// `--current` (and currentPane()) resolve to the palette, not the pane the
-// user came from. Splitting the overlay makes herdr ignore --direction, so
-// pane-scoped actions (split/focus/zoom/close_pane) must target the
-// originating pane. herdr hands it to us in HERDR_PLUGIN_CONTEXT_JSON as
-// `focused_pane_id` (confirmed from a live invocation). NB: HERDR_PANE_ID is
-// set too, but it's the overlay's own id — do NOT use it here.
+// Under overlay placement the palette is itself a real, focused pane while
+// open, so `--current` (and currentPane()) resolve to the palette, not the
+// pane the user came from — splitting the overlay also makes herdr ignore
+// --direction. Under the current popup placement this isn't an issue: per
+// herdr's socket-api docs, a popup "leaves plugin focus context on the
+// underlying tiled pane," so the origin pane stays focused throughout.
+// Either way, pane-scoped actions (split/focus/zoom/close_pane) read the
+// origin pane from HERDR_PLUGIN_CONTEXT_JSON's `focused_pane_id`, which
+// names it under both placements (confirmed from a live overlay invocation;
+// documented, not yet independently reproduced live, for popup). NB:
+// HERDR_PANE_ID is only set for pane placements (overlay/split/tab/zoomed)
+// and holds the palette's own id there — popups don't get one at all — do
+// NOT use it here.
 export function originPaneId(): string {
   const raw = process.env.HERDR_PLUGIN_CONTEXT_JSON;
   if (raw) {
