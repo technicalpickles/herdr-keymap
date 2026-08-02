@@ -6,6 +6,12 @@ All notable changes to this plugin are documented here. Format based on
 
 ## [0.6.0] - fork spike (unreleased upstream)
 
+### Fixed
+- `@inquirer/search` hardcodes `pageSize` to 7 regardless of terminal size,
+  so the list only used a sliver of the overlay pane. Size it to
+  `process.stdout.rows` instead (minus ~10 rows of banner/message/footer
+  chrome), falling back to 15 when stdout isn't a TTY.
+
 ### Changed
 - Replaced the two-level category → command menu with a single
   `@inquirer/prompts` `search` prompt: every action listed up front, tagged

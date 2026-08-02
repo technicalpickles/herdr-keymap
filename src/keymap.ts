@@ -8,6 +8,19 @@ const EXIT = "__exit__";
 
 const ALL_NAMES = Object.keys(ACTIONS);
 
+// @inquirer/search hardcodes pageSize to 7 regardless of terminal size, which
+// on a full-height overlay pane wastes most of the vertical space. Size it to
+// the pane instead: header banner + blank lines + message (~6 rows) + footer
+// hint + margin for a wrapped line (~4 rows) = ~10 rows of chrome; give the
+// rest to the list. process.stdout.rows is unset when stdout isn't a TTY
+// (e.g. under test or a piped invocation) — fall back to something roomier
+// than inquirer's default in that case too.
+const CHROME_ROWS = 10;
+function computePageSize(): number {
+  const rows = process.stdout.rows;
+  return rows ? Math.max(7, rows - CHROME_ROWS) : 15;
+}
+
 function formatChoice(name: string, keys: Record<string, string>) {
   const entry = ACTIONS[name];
   const key = entry.noKey ? "(cmd)" : keys[name] || "(unassigned)";
@@ -26,6 +39,7 @@ async function pickAction(keys: Record<string, string>): Promise<string> {
   return search({
     message: headed("Command"),
     theme: NAV_THEME,
+    pageSize: computePageSize(),
     source: async (term) => {
       const needle = term?.toLowerCase() ?? "";
       const names = needle
