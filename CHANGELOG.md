@@ -4,6 +4,17 @@ All notable changes to this plugin are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/); versioning is
 [SemVer](https://semver.org/).
 
+## [0.6.0] - fork spike (unreleased upstream)
+
+### Changed
+- Replaced the two-level category → command menu with a single
+  `@inquirer/prompts` `search` prompt: every action listed up front, tagged
+  with its category, type to filter by category/key/description. No new
+  dependency (`@inquirer/search` is already resolved via `@inquirer/prompts`).
+  Filtering is case-insensitive substring, not true fuzzy.
+- `❯ Exit` is now a pinned entry in the search list instead of a separate
+  category screen.
+
 ## [0.5.1] - 2026-07-17
 
 ### Fixed

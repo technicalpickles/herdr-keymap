@@ -1,8 +1,12 @@
 # keymap
 
 A herdr plugin: shows every keybinding (defaults + your `config.toml`
-overrides) in an overlay pane, grouped by category, and runs the ones that
+overrides) in a fuzzy-searchable overlay pane, and runs the ones that
 have an equivalent in the herdr CLI.
+
+> This fork replaces the original's two-level category → command menu with a
+> single type-to-filter list (`@inquirer/prompts`'s `search`), closer to a
+> VS Code-style command palette. See [Usage](#usage).
 
 ## Demo
 
@@ -15,7 +19,7 @@ src/
   config.ts      # DEFAULTS (stable channel) + loadEffectiveKeys (parses config.toml)
   herdr-cli.ts    # bridge to the herdr CLI (herdr(), currentWorkspaceId, currentPane)
   actions.ts      # ACTIONS table + executors + CATEGORY_ORDER
-  keymap.ts       # entrypoint: category UI → command
+  keymap.ts       # entrypoint: fuzzy-search UI → command
 test/
   config.test.ts  # defaults/overrides merge
   actions.test.ts # ACTIONS table consistency
@@ -100,27 +104,29 @@ tds.keymap` works but `prefix+m` does nothing, this is it — not a plugin bug.
 ## Usage
 
 Press `prefix+m` (by default `ctrl+b`, release, then `m`) to open the
-palette. Every navigation screen is headed by a banner with the plugin name
-and version (read from `herdr-plugin.toml` at runtime).
-
-1. Pick a category (`workspace`, `tab`, `worktree`, `pane`, `agent`,
-   `general`) — each shows its command count in parentheses.
-2. Pick a command within that category, or `❮ Back` to change category.
+palette. It's headed by a banner with the plugin name and version (read from
+`herdr-plugin.toml` at runtime), then drops straight into a search prompt —
+every action is listed up front, tagged with its category (e.g.
+`[pane] prefix+v              Split vertical (left/right)`); type to filter
+by category, key, or description, arrow to the match, enter to run.
+Matching is plain case-insensitive substring, not true fuzzy — enough for a
+~35-entry list without pulling in a fuzzy-match dependency.
 
 The `agent` category is special: its entries are herdr `agent` subcommands
 (Focus agent, Rename agent), not keybindings, so they show `(cmd)` instead of
 a key. They prompt for the target agent via `herdr agent list`, which lists
 every agent in the current herdr session — a session spans all its
 workspaces, not just the active one — each labelled with its workspace.
-`❮ Back` cancels the pick and returns to the action list.
+`❮ Back` cancels the pick and returns to the search list.
 
 Running a command (or hitting an error) closes the palette by itself — it is
 single-use; reopen with `prefix+m` to do something else.
 
 Cancelling never forces `Ctrl+C`: any way you back out of an action —
 a `❮ Back` choice, an empty rename, declining a close confirmation, or `Esc`
-inside a prompt — returns you to the action list without running anything.
-To close the palette, use `❯ Exit` (or `Esc`) at the category screen.
+inside a prompt — returns you to the search list without running anything.
+To close the palette, type to filter down to `❯ Exit` (always pinned at the
+top) or just press `Esc`.
 
 There is no on-screen output of the result (herdr has no documented way for
 the pane to redirect its own stdout to `herdr plugin log list` — that only
