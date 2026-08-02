@@ -126,8 +126,8 @@ single-use; reopen with `prefix+m` to do something else.
 Cancelling never forces `Ctrl+C`: any way you back out of an action —
 a `❮ Back` choice, an empty rename, declining a close confirmation, or `Esc`
 inside a prompt — returns you to the search list without running anything.
-To close the palette, type to filter down to `❯ Exit` (always pinned at the
-top) or just press `Esc`.
+To close the palette, type to filter down to `Exit` (always the last entry)
+or just press `Esc`.
 
 There is no on-screen output of the result (herdr has no documented way for
 the pane to redirect its own stdout to `herdr plugin log list` — that only

@@ -1,11 +1,16 @@
 import { ExitPromptError } from "@inquirer/core";
 import { search } from "@inquirer/prompts";
-import { ACTIONS, PaletteBack } from "./actions.ts";
+import { ACTIONS, CATEGORY_ORDER, PaletteBack } from "./actions.ts";
 import { loadEffectiveKeys } from "./config.ts";
 
 const EXIT = "__exit__";
 
 const ALL_NAMES = Object.keys(ACTIONS);
+
+// Pad the `[category]` tag to the widest one (not just the key column) so
+// descriptions line up in a single column regardless of which category a
+// row belongs to — "[tab]" and "[workspace]" differ by 6 characters.
+const CATEGORY_WIDTH = Math.max(...CATEGORY_ORDER.map((c) => `[${c}]`.length)) + 1;
 
 // @inquirer/search hardcodes pageSize to 7 regardless of terminal size,
 // which wastes space in a popup taller than 7 rows. Size it to the popup
@@ -24,8 +29,9 @@ function formatChoice(name: string, keys: Record<string, string>) {
   const entry = ACTIONS[name];
   const key = entry.noKey ? "(cmd)" : keys[name] || "(unassigned)";
   const tag = entry.executor ? "" : `  [${entry.noCli}]`;
+  const categoryTag = `[${entry.category}]`.padEnd(CATEGORY_WIDTH);
   return {
-    name: `[${entry.category}] ${key.padEnd(22)} ${entry.description}${tag}`,
+    name: `${categoryTag}${key.padEnd(22)} ${entry.description}${tag}`,
     value: name,
   };
 }
@@ -47,7 +53,7 @@ async function pickAction(keys: Record<string, string>): Promise<string> {
             return haystack.includes(needle);
           })
         : ALL_NAMES;
-      return [{ name: "❯ Exit", value: EXIT }, ...names.map((n) => formatChoice(n, keys))];
+      return [...names.map((n) => formatChoice(n, keys)), { name: "Exit", value: EXIT }];
     },
   });
 }

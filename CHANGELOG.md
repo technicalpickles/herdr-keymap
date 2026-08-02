@@ -4,7 +4,20 @@ All notable changes to this plugin are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/); versioning is
 [SemVer](https://semver.org/).
 
-## [0.7.1] - fork spike (unreleased upstream)
+## [0.7.2] - fork spike (unreleased upstream)
+
+### Changed
+- `formatChoice()` now pads the `[category]` tag itself, not just the key
+  column, so descriptions line up in one column regardless of category name
+  length (`[tab]` and `[workspace]` previously threw off every description
+  after them by 6 characters).
+- `Exit` moved from a pinned first entry to the last entry in the list, and
+  dropped its own embedded `❯` (inquirer already marks the active row with
+  its own cursor glyph, so the old `❯ Exit` doubled up).
+- Shortened the `goto` action's "no CLI equivalent" explanation — the old
+  text was long enough to wrap mid-word in an 80%-width popup.
+
+
 
 ### Removed
 - Dropped the banner header (plugin name + version box) from every prompt

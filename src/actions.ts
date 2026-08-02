@@ -196,7 +196,7 @@ export const ACTIONS: Record<string, ActionEntry> = {
   rename_workspace: { category: "workspace", description: "Rename current workspace", executor: renameWorkspace },
   close_workspace: { category: "workspace", description: "Close current workspace", executor: closeWorkspace },
   workspace_picker: { category: "workspace", description: "Workspace picker", executor: workspacePicker },
-  goto: { category: "workspace", description: "Go to (goto)", noCli: "scope not precisely documented, not reproduced" },
+  goto: { category: "workspace", description: "Go to (goto)", noCli: "scope undocumented" },
   navigate_workspace_up: { category: "workspace", description: "Navigate workspace up", executor: () => navigateWorkspace(-1) },
   navigate_workspace_down: { category: "workspace", description: "Navigate workspace down", executor: () => navigateWorkspace(1) },
   new_worktree: { category: "worktree", description: "New worktree", executor: newWorktree },
