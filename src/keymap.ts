@@ -8,13 +8,13 @@ const EXIT = "__exit__";
 
 const ALL_NAMES = Object.keys(ACTIONS);
 
-// @inquirer/search hardcodes pageSize to 7 regardless of terminal size, which
-// on a full-height overlay pane wastes most of the vertical space. Size it to
-// the pane instead: header banner + blank lines + message (~6 rows) + footer
-// hint + margin for a wrapped line (~4 rows) = ~10 rows of chrome; give the
-// rest to the list. process.stdout.rows is unset when stdout isn't a TTY
-// (e.g. under test or a piped invocation) — fall back to something roomier
-// than inquirer's default in that case too.
+// @inquirer/search hardcodes pageSize to 7 regardless of terminal size,
+// which wastes space in a popup taller than 7 rows. Size it to the popup
+// instead: header banner + blank lines + message (~6 rows) + footer hint +
+// margin for a wrapped line (~4 rows) = ~10 rows of chrome; give the rest to
+// the list. process.stdout.rows is unset when stdout isn't a TTY (e.g.
+// under test or a piped invocation) — fall back to something roomier than
+// inquirer's default in that case too.
 const CHROME_ROWS = 10;
 function computePageSize(): number {
   const rows = process.stdout.rows;
