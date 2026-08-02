@@ -1,8 +1,8 @@
 # keymap
 
 A herdr plugin: shows every keybinding (defaults + your `config.toml`
-overrides) in a fuzzy-searchable overlay pane, and runs the ones that
-have an equivalent in the herdr CLI.
+overrides) in a fuzzy-searchable popup, and runs the ones that have an
+equivalent in the herdr CLI.
 
 > This fork replaces the original's two-level category → command menu with a
 > single type-to-filter list (`@inquirer/prompts`'s `search`), closer to a
@@ -104,8 +104,10 @@ tds.keymap` works but `prefix+m` does nothing, this is it — not a plugin bug.
 ## Usage
 
 Press `prefix+m` (by default `ctrl+b`, release, then `m`) to open the
-palette. It's headed by a banner with the plugin name and version (read from
-`herdr-plugin.toml` at runtime), then drops straight into a search prompt —
+palette. It opens as a floating popup (80% width, 20 rows) over whatever
+you were looking at, rather than taking over the screen. It's headed by a
+banner with the plugin name and version (read from `herdr-plugin.toml` at
+runtime), then drops straight into a search prompt —
 every action is listed up front, tagged with its category (e.g.
 `[pane] prefix+v              Split vertical (left/right)`); type to filter
 by category, key, or description, arrow to the match, enter to run.

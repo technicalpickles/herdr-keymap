@@ -4,6 +4,14 @@ All notable changes to this plugin are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/); versioning is
 [SemVer](https://semver.org/).
 
+## [0.7.0] - fork spike (unreleased upstream)
+
+### Changed
+- Switched the palette pane from `placement = "overlay"` (full-screen
+  takeover) to `placement = "popup"` (80% width, 20 rows), added in herdr
+  0.7.4. The palette now floats over the surrounding panes instead of
+  hiding them. `min_herdr_version` bumped to `0.7.4` accordingly.
+
 ## [0.6.0] - fork spike (unreleased upstream)
 
 ### Fixed
